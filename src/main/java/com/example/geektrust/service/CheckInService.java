@@ -1,10 +1,7 @@
 package com.example.geektrust.service;
 
 
-import com.example.geektrust.domain.MetroCard;
-import com.example.geektrust.domain.PassengerType;
-import com.example.geektrust.domain.Station;
-import com.example.geektrust.domain.StationLedger;
+import com.example.geektrust.domain.*;
 import com.example.geektrust.policy.DiscountPolicy;
 import com.example.geektrust.policy.FarePolicy;
 import com.example.geektrust.policy.RechargePolicy;
@@ -43,39 +40,16 @@ public class CheckInService {
         int baseFare = farePolicy.fareFor(type);
         int discount = discountPolicy.discountFor(card, from, baseFare);
 
+        Journey journey = new Journey(type, from, baseFare, discount);
 
-
-        int payable = baseFare - discount;
-
-
-        ensureSufficientBalance(card, payable, from);
-
-
-        card.debit(payable);
+        StationLedger ledger = ledgerRepo.get(from);
+        card.payFare(journey.getPayable(), rechargePolicy, ledger);
         if(discount>NO_DISCOUNT){
             card.markJourneyFrom(NO_STATION);
         }else{
             card.markJourneyFrom(from);
         }
-
-
-
-
-
-        StationLedger ledger = ledgerRepo.get(from);
-        ledger.recordPassenger(type);
-        ledger.addCollection(payable);
-        ledger.addDiscount(discount);
+        ledger.recordJourney(journey);
     }
 
-
-    private void ensureSufficientBalance(MetroCard card, int required, Station atStation) {
-        int missing = Math.max(NO_MISSING_BALANCE, required - card.balance());
-        if (missing > NO_MISSING_BALANCE) {
-            int fee = rechargePolicy.serviceFeeFor(missing);
-            card.credit(missing);
-            ledgerRepo.get(atStation).addCollection(fee);
-
-        }
-    }
 }

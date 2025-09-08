@@ -35,5 +35,12 @@ public class StationLedger {
 
 
     public void addCollection(int amount) { this.totalCollection += amount; }
+
     public void addDiscount(int amount) { this.totalDiscountGiven += amount; }
+
+    public void recordJourney(Journey journey) {
+        recordPassenger(journey.getType());
+        addCollection(journey.getPayable());
+        addDiscount(journey.getDiscount());
+    }
 }

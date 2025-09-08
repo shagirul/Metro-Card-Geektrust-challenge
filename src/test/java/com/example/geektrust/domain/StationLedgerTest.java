@@ -68,4 +68,34 @@ public class StationLedgerTest {
         Map<PassengerType, Integer> countsAfterModification = ledger.passengerCountsView();
         assertEquals(1, countsAfterModification.get(PassengerType.ADULT));
     }
+    @Test
+    @DisplayName("recordJourney should update passenger count, collection, and discount")
+    void recordJourney_shouldUpdateAllFields() {
+        StationLedger ledger = new StationLedger(Station.CENTRAL);
+        Journey journey = new Journey(PassengerType.ADULT, Station.CENTRAL, 200, 50);
+
+        ledger.recordJourney(journey);
+
+        Map<PassengerType, Integer> counts = ledger.passengerCountsView();
+        assertEquals(1, counts.get(PassengerType.ADULT));
+        assertEquals(150, ledger.totalCollection());   // payable = 200 - 50
+        assertEquals(50, ledger.totalDiscountGiven());
+    }
+
+    @Test
+    @DisplayName("recordJourney should accumulate multiple journeys")
+    void recordJourney_shouldAccumulateMultipleJourneys() {
+        StationLedger ledger = new StationLedger(Station.AIRPORT);
+
+        ledger.recordJourney(new Journey(PassengerType.ADULT, Station.AIRPORT, 100, 20)); // payable 80
+        ledger.recordJourney(new Journey(PassengerType.KID, Station.AIRPORT, 50, 0));    // payable 50
+        ledger.recordJourney(new Journey(PassengerType.ADULT, Station.AIRPORT, 200, 50));// payable 150
+
+        Map<PassengerType, Integer> counts = ledger.passengerCountsView();
+        assertEquals(2, counts.get(PassengerType.ADULT));
+        assertEquals(1, counts.get(PassengerType.KID));
+
+        assertEquals(280, ledger.totalCollection()); // 80 + 50 + 150
+        assertEquals(70, ledger.totalDiscountGiven()); // 20 + 50
+    }
 }

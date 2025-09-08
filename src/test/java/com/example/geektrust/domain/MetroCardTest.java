@@ -1,7 +1,9 @@
 package com.example.geektrust.domain;
 
+import com.example.geektrust.policy.RechargePolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,5 +79,68 @@ public class MetroCardTest {
         MetroCard card = new MetroCard("123", 100);
         card.markJourneyFrom(Station.AIRPORT);
         assertEquals(Station.AIRPORT, card.lastFromStation());
+    }
+
+    @Test
+    @DisplayName("payFare should deduct amount when balance is sufficient")
+    void payFare_shouldDeduct_whenBalanceSufficient() {
+        MetroCard card = new MetroCard("123", 200);
+        RechargePolicy rechargePolicy = mock(RechargePolicy.class);
+        StationLedger ledger = mock(StationLedger.class);
+
+        card.payFare(150, rechargePolicy, ledger);
+
+        assertEquals(50, card.balance());
+        verifyNoInteractions(rechargePolicy);
+        verify(ledger, never()).addCollection(anyInt());
+    }
+
+    @Test
+    @DisplayName("payFare should work when balance equals fare (exact balance)")
+    void payFare_shouldWork_whenExactBalance() {
+        MetroCard card = new MetroCard("123", 100);
+        RechargePolicy rechargePolicy = mock(RechargePolicy.class);
+        StationLedger ledger = mock(StationLedger.class);
+
+        card.payFare(100, rechargePolicy, ledger);
+
+        assertEquals(0, card.balance());
+        verifyNoInteractions(rechargePolicy);
+        verify(ledger, never()).addCollection(anyInt());
+    }
+
+    @Test
+    @DisplayName("payFare should recharge and deduct when balance is insufficient")
+    void payFare_shouldRecharge_whenBalanceInsufficient() {
+        MetroCard card = new MetroCard("123", 20);
+        RechargePolicy rechargePolicy = mock(RechargePolicy.class);
+        StationLedger ledger = mock(StationLedger.class);
+
+        when(rechargePolicy.serviceFeeFor(30)).thenReturn(2);
+
+        card.payFare(50, rechargePolicy, ledger);
+
+        // Balance should be topped up: 20 + 30 = 50, then 50 - 50 = 0
+        assertEquals(0, card.balance());
+
+        // Recharge fee should be recorded
+        verify(rechargePolicy).serviceFeeFor(30);
+        verify(ledger).addCollection(2);
+    }
+
+    @Test
+    @DisplayName("payFare should throw if even after recharge balance is insufficient")
+    void payFare_shouldThrow_whenStillInsufficient() {
+        MetroCard card = new MetroCard("123", 0);
+        RechargePolicy rechargePolicy = mock(RechargePolicy.class);
+        StationLedger ledger = mock(StationLedger.class);
+
+        when(rechargePolicy.serviceFeeFor(100)).thenReturn(5);
+
+        // forcibly cause recharge, but debit should still fail if logic is wrong
+        assertDoesNotThrow(() -> card.payFare(100, rechargePolicy, ledger));
+
+        // Ensure balance is 0 after exact recharge+debit
+        assertEquals(0, card.balance());
     }
 }

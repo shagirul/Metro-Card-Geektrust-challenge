@@ -1,4 +1,4 @@
 package com.example.geektrust;
 
-public class MainTest {
+class MainTest {
 }

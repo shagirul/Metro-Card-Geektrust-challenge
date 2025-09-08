@@ -1,9 +1,6 @@
 package com.example.geektrust.service;
 
-import com.example.geektrust.domain.MetroCard;
-import com.example.geektrust.domain.PassengerType;
-import com.example.geektrust.domain.Station;
-import com.example.geektrust.domain.StationLedger;
+import com.example.geektrust.domain.*;
 import com.example.geektrust.policy.DiscountPolicy;
 import com.example.geektrust.policy.FarePolicy;
 import com.example.geektrust.policy.RechargePolicy;
@@ -47,68 +44,45 @@ class CheckInServiceTest {
     }
 
     @Test
-    void checkIn_noDiscount_sufficientBalance() {
+    void checkIn_noDiscount() {
         when(farePolicy.fareFor(PassengerType.ADULT)).thenReturn(200);
         when(discountPolicy.discountFor(card, Station.CENTRAL, 200)).thenReturn(0);
-        when(card.balance()).thenReturn(500);
 
         checkInService.checkIn("MC1", PassengerType.ADULT, Station.CENTRAL);
 
-        verify(card).debit(200);
+        // verify payFare with payable amount 200
+        verify(card).payFare(eq(200), eq(rechargePolicy), eq(ledger));
+        // journey recorded
+        ArgumentCaptor<Journey> captor = ArgumentCaptor.forClass(Journey.class);
+        verify(ledger).recordJourney(captor.capture());
+
+        Journey journey = captor.getValue();
+        assertEquals(PassengerType.ADULT, journey.getType());
+        assertEquals(200, journey.getBaseFare());
+        assertEquals(0, journey.getDiscount());
+        assertEquals(200, journey.getPayable());
+
+        // marked journey from current station
         verify(card).markJourneyFrom(Station.CENTRAL);
-        verify(ledger).recordPassenger(PassengerType.ADULT);
-        verify(ledger).addCollection(200);
-        verify(ledger).addDiscount(0);
-        verifyNoMoreInteractions(rechargePolicy);
     }
 
     @Test
     void checkIn_withDiscount() {
         when(farePolicy.fareFor(PassengerType.ADULT)).thenReturn(200);
-        when(discountPolicy.discountFor(card, Station.CENTRAL, 200)).thenReturn(100);
-        when(card.balance()).thenReturn(500);
+        when(discountPolicy.discountFor(card, Station.CENTRAL, 200)).thenReturn(50);
 
         checkInService.checkIn("MC1", PassengerType.ADULT, Station.CENTRAL);
 
-        verify(card).debit(100);
+        // verify payFare with payable 150
+        verify(card).payFare(eq(150), eq(rechargePolicy), eq(ledger));
+
+        // journey recorded
+        ArgumentCaptor<Journey> captor = ArgumentCaptor.forClass(Journey.class);
+        verify(ledger).recordJourney(captor.capture());
+        assertEquals(50, captor.getValue().getDiscount());
+
+        // since discount > 0, markJourneyFrom(null)
         verify(card).markJourneyFrom(null);
-        verify(ledger).recordPassenger(PassengerType.ADULT);
-        verify(ledger).addCollection(100);
-        verify(ledger).addDiscount(100);
-    }
-
-    @Test
-    void checkIn_insufficientBalance_triggersRecharge() {
-        when(farePolicy.fareFor(PassengerType.KID)).thenReturn(50);
-        when(discountPolicy.discountFor(card, Station.CENTRAL, 50)).thenReturn(0);
-        when(card.balance()).thenReturn(20);
-        when(rechargePolicy.serviceFeeFor(30)).thenReturn(1);
-
-        checkInService.checkIn("MC1", PassengerType.KID, Station.CENTRAL);
-
-        verify(card).credit(30);
-        verify(ledger).addCollection(1);
-        verify(card).debit(50);
-        verify(card).markJourneyFrom(Station.CENTRAL);
-        verify(ledger).recordPassenger(PassengerType.KID);
-        verify(ledger).addCollection(50);
-        verify(ledger).addDiscount(0);
-    }
-
-    @Test
-    void checkIn_exactBalance_noRecharge() {
-        when(farePolicy.fareFor(PassengerType.SENIOR_CITIZEN)).thenReturn(100);
-        when(discountPolicy.discountFor(card, Station.AIRPORT, 100)).thenReturn(0);
-        when(card.balance()).thenReturn(100);
-
-        checkInService.checkIn("MC1", PassengerType.SENIOR_CITIZEN, Station.AIRPORT);
-
-        verify(card).debit(100);
-        verify(card).markJourneyFrom(Station.AIRPORT);
-        verify(ledger).recordPassenger(PassengerType.SENIOR_CITIZEN);
-        verify(ledger).addCollection(100);
-        verify(ledger).addDiscount(0);
-        verifyNoInteractions(rechargePolicy);
     }
 
     @Test

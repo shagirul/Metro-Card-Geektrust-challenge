@@ -1,8 +1,11 @@
 package com.example.geektrust.domain;
 
+import com.example.geektrust.policy.RechargePolicy;
+
 import java.util.Objects;
 
 public class MetroCard {
+    private static final int NO_MISSING_BALANCE = 0;
     private final String number;
     private int balance;
 
@@ -33,5 +36,16 @@ public class MetroCard {
 
 
     public void markJourneyFrom(Station from) { this.lastFromStation = from; }
+
+    public void payFare(int amount, RechargePolicy rechargePolicy, StationLedger ledger) {
+        int missing = Math.max(NO_MISSING_BALANCE, amount - balance);
+        if (missing > NO_MISSING_BALANCE) {
+            int fee = rechargePolicy.serviceFeeFor(missing);
+            credit(missing);
+            ledger.addCollection(fee);
+        }
+        debit(amount);
+    }
+
 
 }
