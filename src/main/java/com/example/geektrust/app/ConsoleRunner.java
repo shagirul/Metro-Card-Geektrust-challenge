@@ -25,37 +25,47 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConsoleRunner {
-    public void run(String filePath) throws Exception {
+    private final Map<String, CommandHandler> handlers;
+
+    public ConsoleRunner() {
+        this.handlers = createHandlers();
+    }
+
+    // Separate method to compose dependencies and handlers
+    private Map<String, CommandHandler> createHandlers() {
         MetroCardRepository cardRepo = new InMemoryMetroCardRepository();
         StationLedgerRepository ledgerRepo = new InMemoryStationLedgerRepository();
         FarePolicy farePolicy = new FlatFarePolicy();
         DiscountPolicy discountPolicy = new ReturnJourneyDiscountPolicy();
         RechargePolicy rechargePolicy = new ServiceFeeRechargePolicy();
 
-
         BalanceService balanceService = new BalanceService(cardRepo);
         CheckInService checkInService = new CheckInService(cardRepo, ledgerRepo, farePolicy, discountPolicy, rechargePolicy);
         SummaryService summaryService = new SummaryService(ledgerRepo);
         SummaryPrinter printer = new SummaryPrinter();
 
+        Map<String, CommandHandler> map = new HashMap<>();
+        map.put("BALANCE", new BalanceHandler(balanceService));
+        map.put("CHECK_IN", new CheckInHandler(checkInService));
+        map.put("PRINT_SUMMARY", new PrintSummaryHandler(summaryService, printer));
+        return map;
+    }
 
-        Map<String, CommandHandler> handlers = new HashMap<>();
-        handlers.put("BALANCE", new BalanceHandler(balanceService));
-        handlers.put("CHECK_IN", new CheckInHandler(checkInService));
-        handlers.put("PRINT_SUMMARY", new PrintSummaryHandler(summaryService, printer));
-
-
+    public void run(String filePath) throws Exception {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                Command cmd = CommandParser.parse(line);
-                CommandHandler handler = handlers.get(cmd.getName());
-                if (handler == null) {
-                    throw new IllegalArgumentException("Unknown command: " + cmd.getName());
-                }
-                handler.handle(cmd);
-            }
+            br.lines()
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty())
+                    .map(CommandParser::parse)
+                    .forEach(this::dispatch);
         }
+    }
+
+    private void dispatch(Command command) {
+        CommandHandler handler = handlers.get(command.getName());
+        if (handler == null) {
+            throw new IllegalArgumentException("Unknown command: " + command.getName());
+        }
+        handler.handle(command);
     }
 }
