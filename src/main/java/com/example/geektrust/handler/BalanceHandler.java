@@ -15,7 +15,6 @@ public final class BalanceHandler implements CommandHandler {
 
     @Override
     public void handle(Command command) {
-// BALANCE <METROCARD_NUMBER> <BALANCE>
         String cardId = command.getArgs().get(0);
         int amount = Integer.parseInt(command.getArgs().get(1));
         balanceService.initBalance(cardId, amount);

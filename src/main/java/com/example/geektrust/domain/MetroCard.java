@@ -5,8 +5,8 @@ import java.util.Objects;
 public class MetroCard {
     private final String number;
     private int balance;
-    // Remember last origin to determine return leg eligibility
-    private Station lastFromStation; // null means no previous journey
+
+    private Station lastFromStation;
 
 
     public MetroCard(String number, int initialBalance) {

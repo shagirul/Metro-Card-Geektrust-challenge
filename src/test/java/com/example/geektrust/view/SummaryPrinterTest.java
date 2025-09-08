@@ -38,22 +38,17 @@ class SummaryPrinterTest {
         when(ledger.totalCollection()).thenReturn(100);
         when(ledger.totalDiscountGiven()).thenReturn(10);
 
-        // Java 8 compatible
         when(summary.ledgers()).thenReturn(Arrays.asList(ledger));
 
-        // Prepare passenger counts with correct type
         Map<PassengerType, Integer> passengerCounts = new HashMap<>();
         passengerCounts.put(PassengerType.ADULT, 2);
         passengerCounts.put(PassengerType.KID, 1);
 
-        // Convert map entries to List<Map.Entry<PassengerType, Integer>>
         List<Map.Entry<PassengerType, Integer>> passengerList = new ArrayList<>(passengerCounts.entrySet());
         when(summary.sortedPassengerCounts(ledger)).thenReturn(passengerList);
 
-        // Act
         printer.print(summary);
 
-        // Assert
         String output = outContent.toString();
 
         assertTrue(output.contains("TOTAL_COLLECTION CENTRAL 100 10"));
@@ -61,7 +56,6 @@ class SummaryPrinterTest {
         assertTrue(output.contains("ADULT 2"));
         assertTrue(output.contains("KID 1"));
 
-        // Clean up
         System.setOut(originalOut);
     }
 

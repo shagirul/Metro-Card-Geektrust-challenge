@@ -10,7 +10,7 @@ public final class ServiceFeeRechargePolicy implements RechargePolicy {
     @Override
     public int serviceFeeFor(int rechargeAmount) {
         if (rechargeAmount <= 0) return 0;
-// Round up to nearest integer to avoid losing fractional currency units
+
         return (int) Math.ceil(rechargeAmount * (FEE_PERCENT / 100.0));
     }
 }

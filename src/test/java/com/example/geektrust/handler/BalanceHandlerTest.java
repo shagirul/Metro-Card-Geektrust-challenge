@@ -20,7 +20,6 @@ class BalanceHandlerTest {
         Command command = new Command("BALANCE", Arrays.asList("MC1", "100"));
         handler.handle(command);
 
-        // Assert repo actually has the card initialized
         assertEquals(100, repo.getOrThrow("MC1").balance());
     }
 }

@@ -62,7 +62,7 @@ public class StationLedgerTest {
         ledger.recordPassenger(PassengerType.ADULT);
         Map<PassengerType, Integer> counts = ledger.passengerCountsView();
 
-        // Modifying the returned map should not affect internal state
+
         counts.put(PassengerType.ADULT, 100);
 
         Map<PassengerType, Integer> countsAfterModification = ledger.passengerCountsView();

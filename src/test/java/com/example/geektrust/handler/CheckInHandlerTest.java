@@ -14,17 +14,14 @@ class CheckInHandlerTest {
 
     @Test
     void shouldDelegateToCheckInService() {
-        // Arrange
         CheckInService mockService = mock(CheckInService.class);
         CheckInHandler handler = new CheckInHandler(mockService);
 
         Command command = new Command("CHECK_IN",
                 Arrays.asList("MC1", PassengerType.ADULT.name(), Station.CENTRAL.name()));
 
-        // Act
         handler.handle(command);
 
-        // Assert - verify correct delegation
         verify(mockService, times(1))
                 .checkIn("MC1", PassengerType.ADULT, Station.CENTRAL);
     }

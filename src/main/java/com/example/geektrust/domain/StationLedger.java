@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class StationLedger {
     private final Station station;
-    private int totalCollection; // includes fares + service fee from recharges done at this station
+    private int totalCollection;
     private int totalDiscountGiven;
     private final Map<PassengerType, Integer> passengerCounts = new EnumMap<>(PassengerType.class);
 

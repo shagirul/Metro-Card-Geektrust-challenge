@@ -113,16 +113,13 @@ class CheckInServiceTest {
 
     @Test
     void ensureSufficientBalance_handlesNoMissing() throws Exception {
-        // Cover branch where missing=0
         when(farePolicy.fareFor(PassengerType.ADULT)).thenReturn(200);
         when(discountPolicy.discountFor(card, Station.CENTRAL, 200)).thenReturn(0);
         when(card.balance()).thenReturn(200);
 
         checkInService.checkIn("MC1", PassengerType.ADULT, Station.CENTRAL);
 
-        // No recharge
 
-        // No recharge
         verify(card, never()).credit(anyInt());
         verify(rechargePolicy, never()).serviceFeeFor(anyInt());
     }

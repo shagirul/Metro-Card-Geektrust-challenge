@@ -27,17 +27,9 @@ public class ServiceFeeRechargePolicyTest {
     @Test
     @DisplayName("serviceFeeFor calculates correct fee rounded up for positive amounts")
     void serviceFeeFor_positiveAmount_calculatesCorrectFee() {
-        // 2% of 100 = 2.0
         assertEquals(2, policy.serviceFeeFor(100));
-
-        // 2% of 149 = 2.98, rounds up to 3
         assertEquals(3, policy.serviceFeeFor(149));
-
-        // 2% of 1 = 0.02, rounds up to 1
         assertEquals(1, policy.serviceFeeFor(1));
-
-        // 2% of 0.5 (integer input impossible, but test small positive integer)
-        // Just test 1 again as minimum positive integer
         assertEquals(1, policy.serviceFeeFor(1));
     }
 }

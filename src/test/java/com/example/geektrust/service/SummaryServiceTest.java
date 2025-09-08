@@ -56,7 +56,6 @@ class SummaryServiceTest {
         List<Map.Entry<PassengerType, Integer>> result = summary.sortedPassengerCounts(centralLedger);
 
         assertEquals(2, result.size());
-        // Both have count 2, so sorted alphabetically by enum name
         assertEquals(PassengerType.ADULT, result.get(0).getKey());
         assertEquals(PassengerType.SENIOR_CITIZEN, result.get(1).getKey());
     }

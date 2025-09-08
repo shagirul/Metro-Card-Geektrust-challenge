@@ -30,16 +30,13 @@ class PrintSummaryHandlerTest {
 
     @Test
     void shouldDelegateToSummaryPrinter() {
-        // Arrange
         SummaryService.PrintableSummary fakeSummary = mock(SummaryService.PrintableSummary.class);
         when(summaryService.buildPrintable()).thenReturn(fakeSummary);
 
         Command command = new Command("PRINT_SUMMARY", Collections.emptyList());
 
-        // Act
         handler.handle(command);
 
-        // Assert
         verify(summaryService).buildPrintable();
         verify(printer).print(fakeSummary);
     }

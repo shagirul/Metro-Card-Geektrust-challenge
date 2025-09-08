@@ -28,7 +28,7 @@ public class InMemoryMetroCardRepositoryTest {
         repo.upsert("card1", 500);
         MetroCard updatedCard = repo.upsert("card1", 300);
         assertEquals("card1", updatedCard.number());
-        assertEquals(800, updatedCard.balance());  // 500 + 300
+        assertEquals(800, updatedCard.balance());
     }
 
     @Test

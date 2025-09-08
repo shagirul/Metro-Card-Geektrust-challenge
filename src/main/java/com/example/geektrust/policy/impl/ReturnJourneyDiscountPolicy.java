@@ -6,7 +6,7 @@ import com.example.geektrust.domain.Station;
 import com.example.geektrust.policy.DiscountPolicy;
 
 public final class ReturnJourneyDiscountPolicy implements DiscountPolicy {
-    private static final int RETURN_DISCOUNT_PERCENT = 50; // Named constant over magic number
+    private static final int RETURN_DISCOUNT_PERCENT = 50;
 
 
     @Override

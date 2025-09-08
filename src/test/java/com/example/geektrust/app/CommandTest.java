@@ -17,7 +17,7 @@ class CommandTest {
         assertEquals("TEST", cmd.getName());
         assertEquals(Arrays.asList("ARG1", "ARG2"), cmd.getArgs());
 
-        // Ensure immutability
+
         assertThrows(UnsupportedOperationException.class, () -> {
             cmd.getArgs().add("NEW");
         });
