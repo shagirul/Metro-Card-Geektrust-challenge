@@ -31,7 +31,6 @@ public class ConsoleRunner {
         this.handlers = createHandlers();
     }
 
-    // Separate method to compose dependencies and handlers
     private Map<String, CommandHandler> createHandlers() {
         MetroCardRepository cardRepo = new InMemoryMetroCardRepository();
         StationLedgerRepository ledgerRepo = new InMemoryStationLedgerRepository();

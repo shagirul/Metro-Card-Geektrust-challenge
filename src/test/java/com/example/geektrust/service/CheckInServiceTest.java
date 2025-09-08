@@ -50,9 +50,7 @@ class CheckInServiceTest {
 
         checkInService.checkIn("MC1", PassengerType.ADULT, Station.CENTRAL);
 
-        // verify payFare with payable amount 200
         verify(card).payFare(eq(200), eq(rechargePolicy), eq(ledger));
-        // journey recorded
         ArgumentCaptor<Journey> captor = ArgumentCaptor.forClass(Journey.class);
         verify(ledger).recordJourney(captor.capture());
 
@@ -62,7 +60,6 @@ class CheckInServiceTest {
         assertEquals(0, journey.getDiscount());
         assertEquals(200, journey.getPayable());
 
-        // marked journey from current station
         verify(card).markJourneyFrom(Station.CENTRAL);
     }
 
@@ -73,15 +70,12 @@ class CheckInServiceTest {
 
         checkInService.checkIn("MC1", PassengerType.ADULT, Station.CENTRAL);
 
-        // verify payFare with payable 150
         verify(card).payFare(eq(150), eq(rechargePolicy), eq(ledger));
 
-        // journey recorded
         ArgumentCaptor<Journey> captor = ArgumentCaptor.forClass(Journey.class);
         verify(ledger).recordJourney(captor.capture());
         assertEquals(50, captor.getValue().getDiscount());
 
-        // since discount > 0, markJourneyFrom(null)
         verify(card).markJourneyFrom(null);
     }
 
