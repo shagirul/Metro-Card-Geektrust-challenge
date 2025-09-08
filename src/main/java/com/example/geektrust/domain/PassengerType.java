@@ -1,9 +1,9 @@
 package com.example.geektrust.domain;
 
 public enum PassengerType {
-    ADULT(200),
-    SENIOR_CITIZEN(100),
-    KID(50);
+    ADULT(Fare.BASE_FARE_ADULT),
+    SENIOR_CITIZEN(Fare.BASE_FARE_SENIOR),
+    KID(Fare.BASE_FARE_KID);
 
 
     private final int baseFare;
@@ -13,4 +13,10 @@ public enum PassengerType {
 
 
     public int baseFare() { return baseFare; }
+    public static class Fare {
+        public static final int BASE_FARE_ADULT = 200;
+        public static final int BASE_FARE_SENIOR = 100;
+        public static final int BASE_FARE_KID = 50;
+        // could add CURRENCY = "INR" if you want clarity
+    }
 }

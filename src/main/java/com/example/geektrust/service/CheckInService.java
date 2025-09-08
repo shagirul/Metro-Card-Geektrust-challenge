@@ -12,6 +12,12 @@ import com.example.geektrust.repository.MetroCardRepository;
 import com.example.geektrust.repository.StationLedgerRepository;
 
 public class CheckInService {
+
+    private static final int NO_DISCOUNT = 0;
+    private static final int NO_MISSING_BALANCE = 0;
+    private static final Station NO_STATION = null;
+
+
     private final MetroCardRepository cardRepo;
     private final StationLedgerRepository ledgerRepo;
     private final FarePolicy farePolicy;
@@ -46,8 +52,8 @@ public class CheckInService {
 
 
         card.debit(payable);
-        if(discount>0){
-            card.markJourneyFrom(null);
+        if(discount>NO_DISCOUNT){
+            card.markJourneyFrom(NO_STATION);
         }else{
             card.markJourneyFrom(from);
         }
@@ -64,8 +70,8 @@ public class CheckInService {
 
 
     private void ensureSufficientBalance(MetroCard card, int required, Station atStation) {
-        int missing = Math.max(0, required - card.balance());
-        if (missing > 0) {
+        int missing = Math.max(NO_MISSING_BALANCE, required - card.balance());
+        if (missing > NO_MISSING_BALANCE) {
             int fee = rechargePolicy.serviceFeeFor(missing);
             card.credit(missing);
             ledgerRepo.get(atStation).addCollection(fee);

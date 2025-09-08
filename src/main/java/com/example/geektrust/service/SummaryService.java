@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SummaryService {
+    private static final int ZERO = 0;
     private final StationLedgerRepository ledgerRepository;
 
 
@@ -41,10 +42,10 @@ public class SummaryService {
         public List<Map.Entry<PassengerType, Integer>> sortedPassengerCounts(StationLedger ledger) {
             Map<PassengerType, Integer> counts = ledger.passengerCountsView();
             return counts.entrySet().stream()
-                    .filter(e -> e.getValue() > 0)
+                    .filter(e -> e.getValue() > ZERO)
                     .sorted((a, b) -> {
                         int byCount = Integer.compare(b.getValue(), a.getValue());
-                        if (byCount != 0) return byCount;
+                        if (byCount != ZERO) return byCount;
                         return a.getKey().name().compareTo(b.getKey().name());
                     })
                     .collect(Collectors.toList());
